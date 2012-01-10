@@ -69,7 +69,16 @@ public function registerBundles()
 Usage
 ============
 
+At the moment the Bundle comes with two commands
+
+```bash
+php app/console liquibase:generate:changelog [--with-changeset] BundleName:ChangelogName
+php app/console liquibase:update:run BundleName
+```
 
 TODO
 ============
 
+* Write a decent documentation
+* Add a rollback commandline task
+* Add unit tests
