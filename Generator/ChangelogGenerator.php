@@ -24,16 +24,24 @@ class ChangelogGenerator extends \Sensio\Bundle\GeneratorBundle\Generator\Genera
         );
 
         if ($bundle == null) {
-            $changelogPath = 'app/Resources/changelogs/'.$name.'.xml';
+            $changelogPath = 'app/Resources/liquibase/';
         }
         else {
-            $changelogPath = $bundle->getPath().'/Resources/changelogs/'.$name.'.xml';
+            $changelogPath = $bundle->getPath().'/Resources/liquibase/';
         }
 
-        if (file_exists($changelogPath)) {
-            throw new \RuntimeException(sprintf('Changelog "%s" already exists.', $changelogPath));
+        $changelogFile = $changelogPath.'changelogs/'.$name.'.xml';
+        $changelogMasterFile = $changelogPath.'changelog-master.xml';
+
+        if (file_exists($changelogFile)) {
+            throw new \RuntimeException(sprintf('Changelog "%s" already exists.', $changelogFile));
         }
         
-        $this->renderFile($this->skeletonDir, 'changelog.xml', $changelogPath, $parameters);
+        $this->renderFile($this->skeletonDir, 'changelog.xml', $changelogFile, $parameters);
+
+        if (!file_exists($changelogMasterFile)) {
+            $parameter = array('path'=>$changelogPath.'changelogs/');
+            $this->renderFile($this->skeletonDir, 'changelog-master.xml', $changelogMasterFile, $parameter);
+        }
     }
 }
