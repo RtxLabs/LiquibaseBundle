@@ -1,0 +1,20 @@
+{
+  "name": "rtxlabs/liquibase-bundle",
+  "description": "Add Liquibase-Support to Symfony2 projects.",
+  "keywords": ["liquibase", "migrations"],
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Timo Haberkern",
+      "email": "timo.haberkern@rotex.de"
+    }
+  ],
+  "require": {
+    "symfony/framework-bundle": "2.*"
+  },
+  "autoload": {
+    "psr-0": { "RtxLabs\\LiquibaseBundle": "" }
+  },
+  "target-dir": "RtxLabs/LiquibaseBundle"
+}
