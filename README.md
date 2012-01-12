@@ -4,6 +4,8 @@ About
 Bundle that integrates the Liquibase Database migration tool in Symfony projects. The bundle comes with the latest
 LiquiBase-Version, different JDBC drivers and some Commandline tools
 
+[![Build Status](https://secure.travis-ci.org/RtxLabs/LiquibaseBundle.png)](http://travis-ci.org/RtxLabs/LiquibaseBundle)
+
 Installation
 ============
 
