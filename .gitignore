@@ -1,0 +1,4 @@
+/vendor/symfony
+/vendor/twig
+/Tests/autoload.php
+/phpunit.xml

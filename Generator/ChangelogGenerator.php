@@ -2,10 +2,10 @@
 
 namespace RtxLabs\LiquibaseBundle\Generator;
 
-use Symfony\Component\HttpKernel\Util\Filesystem;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\DependencyInjection\Container;
 
-class ChangelogGenerator extends \Sensio\Bundle\GeneratorBundle\Generator\Generator
+class ChangelogGenerator extends Generator
 {
     private $filesystem;
     private $skeletonDir;
