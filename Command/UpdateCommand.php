@@ -29,13 +29,12 @@ class UpdateCommand extends ContainerAwareCommand
                         $this->getContainer()->get('doctrine.dbal.default_connection'));
 
         $bundle = $input->getArgument('bundle');
+        $kernel = $this->getContainer()->get('kernel');
         if (strlen($bundle) > 0) {
-            $bundle = $this->getContainer()->get('kernel')->getBundle($bundle);
+            $runner->runBundleUpdate($kernel->getBundle($bundle));
         }
         else {
-            $bundle = null;
+            $runner->runAppUpdate($kernel);
         }
-
-        $runner->runUpdate($bundle);
     }
 }
