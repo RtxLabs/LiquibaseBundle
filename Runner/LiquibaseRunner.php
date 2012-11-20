@@ -1,6 +1,6 @@
 <?php
 namespace RtxLabs\LiquibaseBundle\Runner;
-use Symfony\Component\HttpKernel\Util\Filesystem;
+use Symfony\Component\FileSystem\Filesystem;
 use Symfony\Component\Process\Process;
 
 class LiquibaseRunner
