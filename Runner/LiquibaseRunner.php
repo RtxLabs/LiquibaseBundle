@@ -14,21 +14,21 @@ class LiquibaseRunner
         $this->dbConnection = $dbConnection;
     }
 
-    public function runAppUpdate(\Symfony\Component\HttpKernel\KernelInterface $kernel)
+    public function runAppUpdate(\Symfony\Component\HttpKernel\KernelInterface $kernel, $dryRun)
     {
-        $this->runUpdate($kernel->getRootDir().'/Resources/liquibase/changelog-master.xml');
+        $this->runUpdate($kernel->getRootDir().'/Resources/liquibase/changelog-master.xml', $dryRun);
     }
 
-    public function runBundleUpdate(\Symfony\Component\HttpKernel\Bundle\BundleInterface $bundle)
+    public function runBundleUpdate(\Symfony\Component\HttpKernel\Bundle\BundleInterface $bundle, $dryRun)
     {
-        $this->runUpdate($bundle->getPath().'/Resources/liquibase/changelog-master.xml');
+        $this->runUpdate($bundle->getPath().'/Resources/liquibase/changelog-master.xml', $dryRun);
     }
 
-    private function runUpdate($changelogFile)
+    private function runUpdate($changelogFile, $dryRun)
     {
         $command = $this->getBaseCommand();
         $command .= ' --changeLogFile='.$changelogFile;
-        $command .= " update";
+        $command .= $dryRun?" updateSQL":" update";
 
         $this->run($command);
     }
