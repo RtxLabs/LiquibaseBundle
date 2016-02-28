@@ -24,6 +24,16 @@ class LiquibaseRunner
         $this->runUpdate($bundle->getPath().'/Resources/liquibase/changelog-master.xml');
     }
 
+    public function runAppSync(\Symfony\Component\HttpKernel\KernelInterface $kernel, $dryRun)
+    {
+        $this->runSync($kernel->getRootDir().'/Resources/liquibase/changelog-master.xml', $dryRun);
+    }
+
+    public function runBundleSync(\Symfony\Component\HttpKernel\Bundle\BundleInterface $bundle, $dryRun)
+    {
+        $this->runSync($bundle->getPath().'/Resources/liquibase/changelog-master.xml', $dryRun);
+    }
+
     private function runUpdate($changelogFile)
     {
         $command = $this->getBaseCommand();
@@ -32,6 +42,16 @@ class LiquibaseRunner
 
         $this->run($command);
     }
+
+    private function runSync($changelogFile, $dryRun)
+    {
+        $command = $this->getBaseCommand();
+        $command .= ' --changeLogFile='.$changelogFile;
+        $command .= $dryRun?" changelogSyncSQL":" changelogSync";
+
+        $this->run($command);
+    }
+
 
     public function runRollback($bundle)
     {
