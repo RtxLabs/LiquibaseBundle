@@ -17,7 +17,7 @@ class UpdateCommand extends ContainerAwareCommand
             ->setName('liquibase:update:run')
             ->setDescription('Generating a Liquibase changelog file skeleton')
             ->addArgument('bundle', InputArgument::OPTIONAL,
-                          'The name of the bundle (shortcut notation AcmeDemoBundle) for that the changlogs should run or all bundles if no one is given')
+                          'The name of the bundle (shortcut notation AcmeDemoBundle) for that the changelogs should run or all bundles if no one is given')
             ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'outputs the SQL-Statements that would run')
         ;
     }
