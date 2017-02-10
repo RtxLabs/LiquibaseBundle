@@ -98,6 +98,10 @@ class LiquibaseRunner
         switch($dbalDriver) {
             case 'pdo_mysql':
             case 'mysql':   $driver = "com.mysql.jdbc.Driver"; break;
+            case 'pdo_pgsql':
+            case 'postgresql':
+            case 'postgres':
+            case 'pgsql':   $driver = "org.postgresql.Driver"; break;
             default: throw new \RuntimeException("No JDBC-Driver found for $dbalDriver");
         }
 
@@ -111,6 +115,10 @@ class LiquibaseRunner
         switch($dbalDriver) {
             case 'pdo_mysql':
             case 'mysql':   $dir .= "mysql-connector-java-5.1.18-bin.jar"; break;
+            case 'pdo_pgsql':
+            case 'postgresql':
+            case 'postgres':
+            case 'pgsql':   $dir .= "postgresql-9.4.1212.jre6.jar"; break;
             default: throw new \RuntimeException("No JDBC-Driver found for $dbalDriver");
         }
 
@@ -120,14 +128,19 @@ class LiquibaseRunner
     protected function getJdbcDsn($dbalParams)
     {
         switch($dbalParams['driver']) {
-            case 'pdo_mysql': return $this->getMysqlJdbcDsn($dbalParams); break;
+            case 'pdo_mysql':
+            case 'mysql': return $this->getStandardJdbcDsn($dbalParams, 'mysql');
+            case 'pdo_pgsql':
+            case 'postgresql':
+            case 'postgres':
+            case 'pgsql': return $this->getStandardJdbcDsn($dbalParams, 'postgresql');
             default: throw new \RuntimeException("Database not supported");
         }
     }
 
-    protected function getMysqlJdbcDsn($dbalParams)
+    protected function getStandardJdbcDsn($dbalParams, $jdbcPrefix)
     {
-        $dsn = "jdbc:mysql://";
+        $dsn = 'jdbc:' . $jdbcPrefix . '://';
         if ($dbalParams['host'] != "") {
             $dsn .= $dbalParams['host'];
         }
