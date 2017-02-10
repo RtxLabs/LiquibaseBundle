@@ -33,10 +33,10 @@ class SyncCommand extends ContainerAwareCommand
         $dryRun = $input->getOption('dry-run');
         $kernel = $this->getContainer()->get('kernel');
         if (strlen($bundle) > 0) {
-            $runner->runBundleSync($kernel->getBundle($bundle), $dryRun);
+            $runner->runBundleSync($kernel->getBundle($bundle), $dryRun, $output);
         }
         else {
-            $runner->runAppSync($kernel, $dryRun);
+            $runner->runAppSync($kernel, $dryRun, $output);
         }
     }
 }
