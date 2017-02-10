@@ -25,6 +25,7 @@ class UpdateCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $runner = new LiquibaseRunner(
+                        $this->getContainer(),
                         $this->getContainer()->get('filesystem'),
                         $this->getContainer()->get('doctrine.dbal.default_connection'));
 
@@ -32,10 +33,10 @@ class UpdateCommand extends ContainerAwareCommand
         $dryRun = $input->getOption('dry-run');
         $kernel = $this->getContainer()->get('kernel');
         if (strlen($bundle) > 0) {
-            $runner->runBundleUpdate($kernel->getBundle($bundle), $dryRun);
+            $runner->runBundleUpdate($kernel->getBundle($bundle), $dryRun, $output);
         }
         else {
-            $runner->runAppUpdate($kernel, $dryRun);
+            $runner->runAppUpdate($kernel, $dryRun, $output);
         }
     }
 }

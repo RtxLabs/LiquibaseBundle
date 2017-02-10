@@ -1,55 +1,68 @@
 <?php
 namespace RtxLabs\LiquibaseBundle\Runner;
-use Symfony\Component\HttpKernel\Util\Filesystem;
-use Symfony\Component\Process\Process;
+use Doctrine\DBAL\Driver\Connection;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class LiquibaseRunner
 {
+
+    /** @var ContainerInterface */
+    private $container;
+
+    /** @var Filesystem */
     private $filesystem;
+
+    /** @var Connection */
     private $dbConnection;
 
-    public function __construct(Filesystem $filesystem, $dbConnection)
+    public function __construct(ContainerInterface $container)
     {
-        $this->filesystem = $filesystem;
-        $this->dbConnection = $dbConnection;
+        $this->container = $container;
+        $this->filesystem = $container->get('filesystem');
+        $this->dbConnection = $container->get('doctrine.dbal.default_connection');
     }
 
-    public function runAppUpdate(\Symfony\Component\HttpKernel\KernelInterface $kernel, $dryRun)
+    public function runAppUpdate(KernelInterface $kernel, $dryRun, OutputInterface $output = null)
     {
-        $this->runUpdate($kernel->getRootDir().'/Resources/liquibase/changelog-master.xml', $dryRun);
+        $this->runUpdate($kernel->getRootDir().'/Resources/liquibase/changelog-master.xml', $dryRun, $output);
     }
 
-    public function runBundleUpdate(\Symfony\Component\HttpKernel\Bundle\BundleInterface $bundle, $dryRun)
+    public function runBundleUpdate(BundleInterface $bundle, $dryRun, OutputInterface $output = null)
     {
-        $this->runUpdate($bundle->getPath().'/Resources/liquibase/changelog-master.xml', $dryRun);
+        $this->runUpdate($bundle->getPath().'/Resources/liquibase/changelog-master.xml', $dryRun, $output);
     }
 
-    public function runAppSync(\Symfony\Component\HttpKernel\KernelInterface $kernel, $dryRun)
+    public function runAppSync(KernelInterface $kernel, $dryRun, OutputInterface $output = null)
     {
-        $this->runSync($kernel->getRootDir().'/Resources/liquibase/changelog-master.xml', $dryRun);
+        $this->runSync($kernel->getRootDir().'/Resources/liquibase/changelog-master.xml', $dryRun, $output);
     }
 
-    public function runBundleSync(\Symfony\Component\HttpKernel\Bundle\BundleInterface $bundle, $dryRun)
+    public function runBundleSync(BundleInterface $bundle, $dryRun, OutputInterface $output = null)
     {
-        $this->runSync($bundle->getPath().'/Resources/liquibase/changelog-master.xml', $dryRun);
+        $this->runSync($bundle->getPath().'/Resources/liquibase/changelog-master.xml', $dryRun, $output);
     }
 
-    private function runUpdate($changelogFile, $dryRun)
+    private function runUpdate($changelogFile, $dryRun, OutputInterface $output = null)
     {
         $command = $this->getBaseCommand();
         $command .= ' --changeLogFile='.$changelogFile;
         $command .= $dryRun?" updateSQL":" update";
 
-        $this->run($command);
+        $this->run($command, $output);
     }
 
-    private function runSync($changelogFile, $dryRun)
+    private function runSync($changelogFile, $dryRun, OutputInterface $output = null)
     {
         $command = $this->getBaseCommand();
         $command .= ' --changeLogFile='.$changelogFile;
         $command .= $dryRun?" changelogSyncSQL":" changelogSync";
 
-        $this->run($command);
+        $this->run($command, $output);
     }
 
 
@@ -63,21 +76,32 @@ class LiquibaseRunner
 
     }
 
-    protected function run($command)
-    {
-        $output = "";
-        exec($command, $output);
+    protected function run($command, OutputInterface $output = null) {
+        if ($output == null) {
+            $output = new ConsoleOutput();
+        }
 
-        echo $command."\n";
-        print_r($output);
+        $output->writeln("Running Liquibase command.");
+        $output->writeln($command);
+
+        $out = array();
+        exec($command, $out);
+
+        foreach ($out as $outLine) {
+            $output->writeln($outLine);
+        }
+    }
+
+    private function getParameter($name) {
+        return $this->container->getParameter('rtx_labs_liquibase.' . $name);
     }
 
     protected function getBaseCommand()
     {
         $dbalParams = $this->dbConnection->getParams();
 
-        $command = 'java -jar '.__DIR__.'/../Resources/vendor/liquibase.jar '.
-                    ' --driver='.$this->getJdbcDriverName($dbalParams['driver']).
+        $command = $this->getParameter('command');
+        $command .= ' --driver='.$this->getJdbcDriverName($dbalParams['driver']).
                     ' --url='.$this->getJdbcDsn($dbalParams);
 
         if ($dbalParams['user'] != "") {
