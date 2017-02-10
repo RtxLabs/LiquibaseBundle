@@ -25,6 +25,7 @@ class SyncCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $runner = new LiquibaseRunner(
+                        $this->getContainer(),
                         $this->getContainer()->get('filesystem'),
                         $this->getContainer()->get('doctrine.dbal.default_connection'));
 

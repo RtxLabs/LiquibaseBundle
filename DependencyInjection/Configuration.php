@@ -24,6 +24,14 @@ class Configuration implements ConfigurationInterface
         // configure your bundle. See the documentation linked above for
         // more information on that topic.
 
+        $rootNode
+            ->children()
+                ->scalarNode('command')
+                    ->defaultValue('java -jar '. str_replace('/DependencyInjection/..', '', __DIR__.'/../Resources/vendor/liquibase.jar'))
+                    ->info('Command used to run liquibase')
+                ->end()
+            ->end();
+
         return $treeBuilder;
     }
 }

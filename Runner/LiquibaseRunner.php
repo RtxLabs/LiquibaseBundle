@@ -1,17 +1,26 @@
 <?php
 namespace RtxLabs\LiquibaseBundle\Runner;
-use Symfony\Component\HttpKernel\Util\Filesystem;
-use Symfony\Component\Process\Process;
+use Doctrine\DBAL\Driver\Connection;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 class LiquibaseRunner
 {
+
+    /** @var ContainerInterface */
+    private $container;
+
+    /** @var Filesystem */
     private $filesystem;
+
+    /** @var Connection */
     private $dbConnection;
 
-    public function __construct(Filesystem $filesystem, $dbConnection)
+    public function __construct(ContainerInterface $container)
     {
-        $this->filesystem = $filesystem;
-        $this->dbConnection = $dbConnection;
+        $this->container = $container;
+        $this->filesystem = $container->get('filesystem');
+        $this->dbConnection = $container->get('doctrine.dbal.default_connection');
     }
 
     public function runAppUpdate(\Symfony\Component\HttpKernel\KernelInterface $kernel, $dryRun)
@@ -72,12 +81,16 @@ class LiquibaseRunner
         print_r($output);
     }
 
+    private function getParameter($name) {
+        return $this->container->getParameter('rtx_labs_liquibase.' . $name);
+    }
+
     protected function getBaseCommand()
     {
         $dbalParams = $this->dbConnection->getParams();
 
-        $command = 'java -jar '.__DIR__.'/../Resources/vendor/liquibase.jar '.
-                    ' --driver='.$this->getJdbcDriverName($dbalParams['driver']).
+        $command = $this->getParameter('command');
+        $command .= ' --driver='.$this->getJdbcDriverName($dbalParams['driver']).
                     ' --url='.$this->getJdbcDsn($dbalParams);
 
         if ($dbalParams['user'] != "") {
