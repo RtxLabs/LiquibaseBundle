@@ -14,12 +14,13 @@ class CreateChangelogCommand extends ContainerAwareCommand
     {
         $this
             ->setName('liquibase:generate:changelog')
-            ->setDescription('Generating a Liquibase changelog file skeleton')
+            ->setDescription('Generate a new Liquibase changelog file skeleton')
             ->addArgument('changelog', InputArgument::OPTIONAL,
-                          'The name of the changelog (shortcut notation AcmeDemoBundle:CreateTable), default is a timestamp',
+                          'The name of the generated changelog file. Default value is the current timestamp.',
                           date('YmdHis'))
-            ->addOption('with-changeset', 'c', InputOption::VALUE_NONE, 'adds a changeset tag to the changelog')
-            ->addOption('author', 'a', InputOption::VALUE_OPTIONAL)
+            ->addOption('bundle', 'b', InputArgument::OPTIONAL, 'Bundle where the changelog will be generated.')
+            ->addOption('with-changeset', 'c', InputOption::VALUE_NONE, 'Add a <changeSet> tag to the changelog')
+            ->addOption('author', 'a', InputOption::VALUE_OPTIONAL, 'Author to use for generation')
         ;
     }
 
@@ -27,14 +28,13 @@ class CreateChangelogCommand extends ContainerAwareCommand
     {
         $generator = new ChangelogGenerator($this->getContainer()->get('filesystem'), __DIR__.'/../Resources/skeleton');
 
-        $changelog = Validators::validateChangelogName($input->getArgument('changelog'));
-        list($bundle, $name) = $this->parseShortcutNotation($changelog);
-
-        if (strlen($bundle) > 0) {
-            $bundle = $this->getContainer()->get('kernel')->getBundle($bundle);
+        list($bundle, $name) = $this->parseShortcutNotation($input->getArgument('changelog'));
+        if ($input->getOption('bundle')) {
+            $bundle = $input->getOption('bundle');
         }
-        else {
-            $bundle = null;
+
+        if ($bundle) {
+            $bundle = $this->getContainer()->get('kernel')->getBundle($bundle);
         }
         
         $generator->generate($bundle, $name, $input->getOption('with-changeset'), $input->getOption('author'));
@@ -42,8 +42,9 @@ class CreateChangelogCommand extends ContainerAwareCommand
 
     protected function parseShortcutNotation($shortcut)
     {
-        if (false === $pos = strpos($shortcut, ':')) {
-            throw new \InvalidArgumentException(sprintf('The changelog name must contain a : ("%s" given, expecting something like AcmeBlogBundle:CreateUserTable or :CreateUserTable)', $shortcut));
+        $pos = strpos($shortcut, ':');
+        if ($pos === false) {
+            return array(null, $shortcut);
         }
 
         return array(substr($shortcut, 0, $pos), substr($shortcut, $pos + 1));
